@@ -1,2 +1,7 @@
 ---
 # handlers file for ansible-provision-rpis
+
+- name      : 'Reload postfix service'
+  service   :
+    name    : 'postfix'
+    state   : 'reloaded'

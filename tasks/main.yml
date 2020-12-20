@@ -23,3 +23,43 @@
   debug:
     var: os_name.stdout
 
+- name: Asegurarnos de que el grupo 'wheel' existe
+  group:
+    name: wheel
+    state: present
+
+- name: Permitir a los usuarios del gpo 'wheel' hacer sudo sin password
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: Desactivar por seguridad el acceso por SSH de root
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+
+- name: Actualizar apt
+  apt: update_cache=yes
+
+- name: Instalar paquetes indicados
+  apt: name={{ provision_rpis_packages }} state=latest
+
+
+# pensar quizás en hacer template y excluir la propia IP?¿
+- name: Añadir líneas en etc_hosts para que se vean entre sí
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {{ item.ip }} {{ item.name }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+  with_items: '{{ provision_rpis_cluster }}'
+
+- name: Install Postfix
+  include_tasks: postfix.yml
+  when: provision_postfix
+

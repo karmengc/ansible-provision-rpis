@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# borramos todos los correos archivados de más de 90 días
+
+maildir="/var/mail/allmail-recycler/new"
+if [[ -d "$maildir" ]]; then
+  find "$maildir" -mtime +90 -type f -exec rm -f {} \;
+fi
