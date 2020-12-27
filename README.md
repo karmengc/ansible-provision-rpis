@@ -1,17 +1,61 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+Rol para provisionar máquinas con sistema operativo Debian a nivel de paquetería, configuración de correo y directorios NFS a importar si fuera necesario.
+Orientado para la configuración de un cluster de Kubernetes.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Este rol se ha testeado en Ubuntu 20.10.
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+```
+provision_cluster_user: "vagrant" 
+#Usuario que si no existe será creado en todas las máquinas destino con permisos sudo.
+
+provision_rpis_cluster:
+#Diccionario con nombre de máquina e IP, para rellenar el fichero /etc/hosts. Ejemplo:
+  - { name: "master", ip: "192.168.130.150" } 
+  - { name: "worker1", ip: "192.168.130.151" }
+  - { name: "worker2", ip: "192.168.130.152" }
+
+provision_rpis_packages: ['vim','curl','wget','iproute2','nfs-common']
+#Paquetes a instalar en todas las máquinas.
+
+provision_postfix: true
+#Indica si instalar y configurar postfix en todas las máquinas.
+#IMPORTANTE: Este rol sólo está preparado para configurar una cuenta gmail y es necesario habilitar en la misma el acceso desde aplicaciones no seguras.
+#No se contempla la posibilidad de configurar postfix en un dominio con certificados.
+#Ejemplo:
+provision_mail_from: "usuario@gmail.com"
+provision_mail_certificate: ""
+provision_mail_smarthost: "smtp.gmail.com"
+provision_mail_smarthost_port: "587"
+provision_mail_localsmtp: false
+
+provision_mount_nfs: true
+#Se indica si se va a montar un directorio NFS o no. Para ello es necesario definir las siguientes variables:
+
+host_ip: "192.168.130.1"
+#Ip desde el host que estamos desplegando Ansible. Utilizado para exportar por NFS. 
+host_nfs_dir_exported: "/home/carmen/UPO/TFM/nfs"
+#Directorio exportado por NFS
+#en este rol no se instalan paquetes en el host ni se configura /etc/exports, se supone que esta labor ya la ha realizado el administrador
+
+
+provision_nfs_share_mounts:
+  - path: /mnt/nfs
+    location: "{{ host_ip }}:{{ host_nfs_dir_exported }}"
+    opts: rw
+#Directorio a montar por NFS. Se hará de forma permanente en /etc/fstab
+
+```
+
+
 
 Dependencies
 ------------
@@ -21,11 +65,11 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Se despliega sobre todos los hosts (all):
 
-    - hosts: servers
+    - hosts: all
       roles:
-         - { role: username.rolename, x: 42 }
+         - role: "ansible-provision-rpis"
 
 License
 -------
