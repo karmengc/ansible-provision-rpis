@@ -1,2 +1,10 @@
 ---
 # defaults file for ansible-provision-rpis
+
+provision_nfs_share_mounts: []
+
+provision_nfs_version: 4
+
+provision_nfs_mount_options: rsize=8192,wsize=8192,timeo=14,intr
+
+

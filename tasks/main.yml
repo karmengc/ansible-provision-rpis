@@ -63,3 +63,7 @@
   include_tasks: postfix.yml
   when: provision_postfix
 
+- name: Mount NFS folder
+  include_tasks: nfs_mount.yml
+  when: provision_mount_nfs
+
