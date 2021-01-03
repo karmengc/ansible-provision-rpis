@@ -6,7 +6,7 @@
     pkg: nfs-common
     state: present
 
-- name: Mount NFS share
+- name: Mount Host NFS share
   become: true
   mount:
     fstype: nfs
@@ -16,5 +16,19 @@
     dump: "{{ item.dump | default(omit) }}"
     passno: "{{ item.passno | default(omit) }}"
     state: "{{ item.state | default( 'mounted' ) }}"
-  with_items: "{{ provision_nfs_share_mounts }}"
+  with_items: "{{ provision_nfs_host_share_mounts }}"
+
+#Montar las carpetas exportadas desde el master con el certificado    
+- name: Mount Master NFS folder at nodes
+  become: true
+  mount:
+    fstype: nfs
+    name: "{{ item.path }}"
+    opts: "vers={{ provision_nfs_version }},{{ item.opts | default(provision_nfs_mount_opts) }}"
+    src: "{{ item.location }}"
+    dump: "{{ item.dump | default(omit) }}"
+    passno: "{{ item.passno | default(omit) }}"
+    state: "{{ item.state | default( 'mounted' ) }}"
+  with_items: "{{ provision_nfs_master_share_mounts }}"
+  when: kubernetes_role == 'node'
 

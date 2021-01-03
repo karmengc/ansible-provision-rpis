@@ -15,7 +15,11 @@ Role Variables
 
 ```
 provision_cluster_user: "vagrant" 
+provision_cluster_user_passwd: "vagrant" 
 #Usuario que si no existe será creado en todas las máquinas destino con permisos sudo.
+#Se recomienda definir la contraseña en un fichero vault (ansible-vault create fichero.yml) guardar contraseña en otro fichero y asignar la ruta del mismo
+#a la variable de entorno siguiente antes de desplegar:
+#export ANSIBLE_VAULT_PASSWORD_FILE=/ruta/al/fichero/.vault_pass.txt
 
 provision_rpis_cluster:
 #Diccionario con nombre de máquina e IP, para rellenar el fichero /etc/hosts. Ejemplo:
