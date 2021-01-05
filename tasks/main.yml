@@ -87,4 +87,7 @@
 - name: Install master selfsigned cert on every machine
   include_tasks: install_cert.yml
 
+- name: Deshabilitar swap si así se requiere
+  include_tasks: disable_swap.yml
+  when: provision_disable_swap
 
