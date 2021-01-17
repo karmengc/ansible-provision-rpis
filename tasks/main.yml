@@ -2,92 +2,102 @@
 # tasks file for ansible-provision-rpis
 
 
-- name: Debug Gathered Facts
-  debug:
-    var: item
-  with_items:
-    - "{{ ansible_lsb }}"
-    - "{{ ansible_default_ipv4 }}"
-    - "{{ ansible_date_time }}"
-    - "{{ ansible_dns }}"
-    - "{{ ansible_env }}"
-    - "{{ ansible_hostname }}"
-    - "{{ ansible_memory_mb }}"
-    - "{{ ansible_memfree_mb }}"
+#- name: Debug Gathered Facts
+#  debug:
+#    var: item
+#  with_items:
+#    - "{{ ansible_lsb }}"
+#    - "{{ ansible_default_ipv4 }}"
+#    - "{{ ansible_date_time }}"
+#    - "{{ ansible_dns }}"
+#    - "{{ ansible_env }}"
+#    - "{{ ansible_hostname }}"
+#    - "{{ ansible_memory_mb }}"
+#    - "{{ ansible_memfree_mb }}"
 
-- name: Capture OS Name
-  command: uname -a
-  register: os_name
+- name          : Capture OS Name
+  command       : uname -a
+  register      : os_name
 
-- name: Debug OS Name
-  debug:
-    var: os_name.stdout
+- name          : Debug OS Name
+  debug         :
+    var         : os_name.stdout
 
-- name: Asegurarnos de que el grupo 'wheel' existe
-  group:
-    name: wheel
-    state: present
+- name          : Configurar Netplan
+  include_tasks : netplan.yml
+  when          : provision_netplan_configure
 
-- name: Check for user
-  shell: egrep "^{{ provision_cluster_user }}:" /etc/passwd
-  register: provision_user_exists
-  ignore_errors: true
+- name          : Establecer el nombre de la máquina
+  hostname      :
+    name        : "{{ provision_hostname }}"
 
-- name: Create specific user with sudo privileges
-  include_tasks: create_sudo_user.yml
-  when: provision_cluster_user is defined and provision_user_exists.rc == 1
+- name          : Asegurarnos de que el grupo 'wheel' existe
+  group         :
+    name        : wheel
+    state       : present
 
-- name: Permitir a los usuarios del gpo 'wheel' hacer sudo sin password
-  lineinfile:
-    path: /etc/sudoers
-    state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: '/usr/sbin/visudo -cf %s'
+- name          : Comprobar si existe el usuario que hemos indicado para el cluster
+  shell         : egrep "^{{ provision_cluster_user }}:" /etc/passwd
+  register      : provision_user_exists
+  ignore_errors : true
 
-- name: Desactivar por seguridad el acceso por SSH de root
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    state: present
-    regexp: '^PermitRootLogin'
-    line: 'PermitRootLogin no'
+- name          : Crear el usuario con privilegios sudo si no existe
+  include_tasks : create_sudo_user.yml
+  when          : provision_cluster_user is defined and provision_user_exists.rc == 1
 
-- name: Actualizar apt
-  apt: update_cache=yes
+- name          : Permitir a los usuarios del gpo 'wheel' hacer sudo sin password
+  lineinfile    :
+    path        : /etc/sudoers
+    state       : present
+    regexp      : '^%wheel'
+    line        : '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate    : '/usr/sbin/visudo -cf %s'
 
-- name: Instalar paquetes indicados
-  apt: name={{ provision_rpis_packages }} state=latest
+- name          : Desactivar por seguridad el acceso por SSH de root
+  lineinfile    :
+    path        : /etc/ssh/sshd_config
+    state       : present
+    regexp      : '^PermitRootLogin'
+    line        : 'PermitRootLogin no'
 
+- name          : Actualizar apt
+  apt           : update_cache=yes
 
-# pensar quizás en hacer template y excluir la propia IP?¿
-- name: Añadir líneas en etc_hosts para que se vean entre sí
-  blockinfile:
-    path: /etc/hosts
-    block: |
-      {{ item.ip }} {{ item.name }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
-  with_items: '{{ provision_rpis_cluster }}'
+- name          : Instalar paquetes indicados
+  apt           : name={{ provision_rpis_packages }} state=latest
 
-- name: Install Postfix
-  include_tasks: postfix.yml
-  when: provision_postfix
+- name          : Añadir líneas en etc_hosts para que se vean entre sí
+  blockinfile   :
+    path        : /etc/hosts
+    block       : |
+                {{ item.ip }} {{ item.name }}
+    marker      : "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+  with_items    : '{{ provision_rpis_cluster }}'
 
-- name: Generate master selfsigned cert
-  include_tasks: master_cert.yml
-  when: kubernetes_role == 'master'
+- name          : Install Postfix
+  include_tasks : postfix.yml
+  when          : provision_postfix
 
-- name: Export NFS folder at master
-  include_tasks: nfs_export.yml
-  when: provision_nfs_master_exports and kubernetes_role == 'master'
+- name          : Generate master selfsigned cert
+  include_tasks : master_cert.yml
+  when          : kubernetes_role == 'master' and provision_master_selfcert
 
-- name: Mount NFS folders
-  include_tasks: nfs_mount.yml
-  when: provision_mount_nfs
+#Exportar directorios desde Master por NFS
+- name          : Export NFS folder at master
+  include_tasks : nfs_export.yml
+  when          : provision_nfs_master_exports is defined and kubernetes_role == 'master'
 
-- name: Install master selfsigned cert on every machine
-  include_tasks: install_cert.yml
+#Montar directorios anteriores
+- name          : Mount NFS folders
+  include_tasks : nfs_mount.yml
+  when          : provision_mount_nfs or provision_master_nfs2nodes
 
-- name: Deshabilitar swap si así se requiere
-  include_tasks: disable_swap.yml
-  when: provision_disable_swap
+- name          : Install master selfsigned cert on every machine
+  include_tasks : install_cert.yml
+  when          : provision_master_selfcert
 
+- name          : Deshabilitar swap si así se requiere
+  include_tasks : disable_swap.yml
+  when          : provision_disable_swap
+
+# vim: ff=unix:ai:et:sw=2:ts=2:

@@ -17,6 +17,7 @@
     passno: "{{ item.passno | default(omit) }}"
     state: "{{ item.state | default( 'mounted' ) }}"
   with_items: "{{ provision_nfs_host_share_mounts }}"
+  when: provision_mount_nfs
 
 #Montar las carpetas exportadas desde el master con el certificado    
 - name: Mount Master NFS folder at nodes
@@ -30,5 +31,5 @@
     passno: "{{ item.passno | default(omit) }}"
     state: "{{ item.state | default( 'mounted' ) }}"
   with_items: "{{ provision_nfs_master_share_mounts }}"
-  when: kubernetes_role == 'node'
+  when: kubernetes_role == 'node' and provision_master_nfs2nodes
 

@@ -5,3 +5,17 @@
   service   :
     name    : 'postfix'
     state   : 'reloaded'
+
+- name      : Generating Netplan Configuration
+  command   : netplan generate
+  listen    : netplan generate config
+  notify    : netplan apply config
+  become    : true
+
+- name      : Applying Netplan Configuration
+  command   : netplan apply
+  listen    : netplan apply config
+  become    : true
+  when      : netplan_apply
+
+# vim: ff=unix:ai:et:sw=2:ts=2:

@@ -7,4 +7,21 @@ provision_nfs_version: 4
 
 provision_nfs_mount_options: rsize=8192,wsize=8192,timeo=14,intr
 
+# defaults file for ansible-netplan
+netplan_config_file: /etc/netplan/ansible-config.yaml
 
+# Configured devices get handled by systemd-networkd by default, unless explicitly marked as managed by a specific renderer (NetworkManager)
+netplan_renderer:
+
+# switch to enable/disable the role completely
+provision_netplan_configure: false
+
+netplan_configuration: {}
+
+netplan_remove_existing: false
+
+netplan_packages:
+  - nplan
+  - netplan.io
+
+netplan_apply: True
