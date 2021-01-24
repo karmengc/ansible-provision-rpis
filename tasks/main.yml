@@ -61,10 +61,15 @@
     line        : 'PermitRootLogin no'
 
 - name          : Actualizar apt
-  apt           : update_cache=yes
+  apt           : 
+    update_cache: yes
+    force_apt_get: yes
+
+- name         : Wait for APT Lock
+  shell        : while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
 
 - name          : Instalar paquetes indicados
-  apt           : name={{ provision_rpis_packages }} state=latest
+  apt           : name={{ provision_rpis_packages }} state=latest force_apt_get=yes
 
 - name          : Añadir líneas en etc_hosts para que se vean entre sí
   blockinfile   :
