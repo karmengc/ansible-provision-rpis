@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Rol para provisionar máquinas con sistema operativo Debian a nivel de paquetería, configuración de correo y directorios NFS a importar si fuera necesario.
+Rol para provisionar máquinas con sistema operativo Debian a nivel de paquetería, configuración de correo y directorios NFS a exportar/importar si fuera necesario.
 Orientado para la configuración de un cluster de Kubernetes.
 
 Requirements

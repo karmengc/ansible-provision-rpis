@@ -15,11 +15,11 @@
 #    - "{{ ansible_memory_mb }}"
 #    - "{{ ansible_memfree_mb }}"
 
-- name          : Capture OS Name
+- name          : Obtener version de Sistema Operativo
   command       : uname -a
   register      : os_name
 
-- name          : Debug OS Name
+- name          : Mostrar version de Sistema Operativo
   debug         :
     var         : os_name.stdout
 
@@ -65,8 +65,8 @@
     update_cache: yes
     force_apt_get: yes
 
-- name         : Wait for APT Lock
-  shell        : while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
+- name          : Esperar si APT se encuentra bloqueado
+  shell         : while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
 
 - name          : Instalar paquetes indicados
   apt           : name={{ provision_rpis_packages }} state=latest force_apt_get=yes
@@ -79,25 +79,25 @@
     marker      : "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
   with_items    : '{{ provision_rpis_cluster }}'
 
-- name          : Install Postfix
+- name          : Instalar y configurar Postfix
   include_tasks : postfix.yml
   when          : provision_postfix
 
-- name          : Generate master selfsigned cert
+- name          : Generar certificado autofirmado de Master
   include_tasks : master_cert.yml
   when          : kubernetes_role == 'master' and provision_master_selfcert
 
 #Exportar directorios desde Master por NFS
-- name          : Export NFS folder at master
+- name          : Exportar carpetas de Master por NFS
   include_tasks : nfs_export.yml
   when          : provision_nfs_master_exports is defined and kubernetes_role == 'master'
 
 #Montar directorios anteriores
-- name          : Mount NFS folders
+- name          : Montar carpetas NFS
   include_tasks : nfs_mount.yml
   when          : provision_mount_nfs or provision_master_nfs2nodes
 
-- name          : Install master selfsigned cert on every machine
+- name          : Instalar certificado de Master en todas las maquinas
   include_tasks : install_cert.yml
   when          : provision_master_selfcert
 

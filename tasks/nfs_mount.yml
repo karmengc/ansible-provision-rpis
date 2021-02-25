@@ -1,35 +1,36 @@
 ---
 
-- name: Install NFS client utility
-  become: true
-  apt:
-    pkg: nfs-common
-    state: present
+- name          : Instalar paquete cliente NFS
+  become        : true
+  apt           :
+    pkg         : nfs-common
+    state       : present
 
-- name: Mount Host NFS share
-  become: true
-  mount:
-    fstype: nfs
-    name: "{{ item.path }}"
-    opts: "vers={{ provision_nfs_version }},{{ item.opts | default(provision_nfs_mount_opts) }}"
-    src: "{{ item.location }}"
-    dump: "{{ item.dump | default(omit) }}"
-    passno: "{{ item.passno | default(omit) }}"
-    state: "{{ item.state | default( 'mounted' ) }}"
-  with_items: "{{ provision_nfs_host_share_mounts }}"
-  when: provision_mount_nfs
+- name          : Montar directorios NFS de la máquina Host en todos los miembros del cluster
+  become        : true
+  mount         :
+    fstype      : nfs
+    name        : "{{ item.path }}"
+    opts        : "vers={{ provision_nfs_version }},{{ item.opts | default(provision_nfs_mount_opts) }}"
+    src         : "{{ item.location }}"
+    dump        : "{{ item.dump | default(omit) }}"
+    passno      : "{{ item.passno | default(omit) }}"
+    state       : "{{ item.state | default( 'mounted' ) }}"
+  with_items    : "{{ provision_nfs_host_share_mounts }}"
+  when          : provision_mount_nfs
 
 #Montar las carpetas exportadas desde el master con el certificado    
-- name: Mount Master NFS folder at nodes
-  become: true
-  mount:
-    fstype: nfs
-    name: "{{ item.path }}"
-    opts: "vers={{ provision_nfs_version }},{{ item.opts | default(provision_nfs_mount_opts) }}"
-    src: "{{ item.location }}"
-    dump: "{{ item.dump | default(omit) }}"
-    passno: "{{ item.passno | default(omit) }}"
-    state: "{{ item.state | default( 'mounted' ) }}"
-  with_items: "{{ provision_nfs_master_share_mounts }}"
-  when: kubernetes_role == 'node' and provision_master_nfs2nodes
+- name          : Montar carpetas NFS exportadas desde el master en los nodos
+  become        : true
+  mount         :
+    fstype      : nfs
+    name        : "{{ item.path }}"
+    opts        : "vers={{ provision_nfs_version }},{{ item.opts | default(provision_nfs_mount_opts) }}"
+    src         : "{{ item.location }}"
+    dump        : "{{ item.dump | default(omit) }}"
+    passno      : "{{ item.passno | default(omit) }}"
+    state       : "{{ item.state | default( 'mounted' ) }}"
+  with_items    : "{{ provision_nfs_master_share_mounts }}"
+  when          : kubernetes_role == 'node' and provision_master_nfs2nodes
 
+# vim: ff=unix:ai:et:sw=2:ts=2:

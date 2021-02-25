@@ -1,25 +1,26 @@
 ---
 
-- name: Ensure directories to export exist
-  file: 
-    path: "{{ item.strip().split()[0] }}"
-    state: directory
-  with_items: "{{ provision_nfs_master_exports }}"
+- name          : Asegurar que los directorios a exportar por NFS existen y en caso contrario crearlos
+  file          : 
+    path        : "{{ item.strip().split()[0] }}"
+    state       : directory
+  with_items    : "{{ provision_nfs_master_exports }}"
 
-- name: Copy exports file.
-  template:
-    src: exports.j2
-    dest: /etc/exports
-    owner: root
-    group: root
-    mode: 0644
-  register: exports_file
+- name          : Establecer fichero exports
+  template      :
+    src         : exports.j2
+    dest        : /etc/exports
+    owner       : root
+    group       : root
+    mode        : 0644
+  register      : exports_file
 
-- name: reload nfs
-  command: 'exportfs -ra'
-  when: exports_file is changed
+- name          : Recargar nfs
+  command       : 'exportfs -ra'
+  when          : exports_file is changed
 
-- name: Ensure nfs is running.
-  service: "name=nfs-kernel-server state=started enabled=yes"
-  when: provision_nfs_master_exports|length
+- name          : Asegurar que el servicio nfs se está ejecutando
+  service       : "name=nfs-kernel-server state=started enabled=yes"
+  when          : provision_nfs_master_exports|length
 
+# vim: ff=unix:ai:et:sw=2:ts=2:

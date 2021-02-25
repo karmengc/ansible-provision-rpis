@@ -3,71 +3,26 @@
 
 ### https://docs.docker.com/engine/security/https/ ###
 
-- name: Create cert folder
-  file:
-    path: "/opt/certs"
-    state: directory
-    owner: root
-    group: wheel
+- name          : Crear carpeta para certificados
+  file          :
+    path        : "/opt/certs"
+    state       : directory
+    owner       : root
+    group       : wheel
 
-- name: Master CA cert
-  command: "openssl genrsa -passout pass:{{ provision_master_cert_passwd }} -aes256 -out /opt/certs/ca.pem 4096"
-  args:
-    creates: "/opt/certs/ca.pem"
+- name          : Master CA cert
+  command       : "openssl genrsa -passout pass:{{ provision_master_cert_passwd }} -aes256 -out /opt/certs/ca.pem 4096"
+  args          :
+    creates     : "/opt/certs/ca.pem"
 
-- name: Master cert generation
-  command: "openssl req -newkey rsa:4096 -nodes -sha256 -keyout /opt/certs/registry.key -x509 -days 365 -subj \"/C=ES/ST=GC/L=GC/O=ITC/OU=ITD/CN=master\" -out /opt/certs/registry.crt"
-  #  command: "openssl req -new -x509 -days 365 -key /opt/certs/ca-key.pem -sha256 -out /opt/certs/ca.pem -passin pass:{{ provision_master_cert_passwd }} -subj \"/C=ES/ST=GC/L=GC/O=ITC/OU=ITD/CN=master\" "
-  args:
-    creates: "/opt/certs/registry.crt"
+- name          : Generar Master cert
+  command       : "openssl req -newkey rsa:4096 -nodes -sha256 -keyout /opt/certs/registry.key -x509 -days 365 -subj \"/C=ES/ST=GC/L=GC/O=ITC/OU=ITD/CN=master\" -out /opt/certs/registry.crt"
+  args          :
+    creates     : "/opt/certs/registry.crt"
 
-- name: Copy cert file
-  command: "cp /opt/certs/registry.crt /opt/certs/registry.cert"
-  args:
-    creates: "/opt/certs/registry.cert"
+- name          : Copiar certificado con extension cert
+  command       : "cp /opt/certs/registry.crt /opt/certs/registry.cert"
+  args          :
+    creates     : "/opt/certs/registry.cert"
 
-    #- name: Master cert key
-    #  command: "openssl genrsa -out /opt/certs/server-key.pem 4096"
-    #
-    #- name: Master cert server csr
-    #  command: "openssl req -subj \"/CN=master\" -sha256 -new -key /opt/certs/server-key.pem -out /opt/certs/server.csr"
-    #
-    #- name: Create cert extfile
-    #  file:
-    #    path: "/opt/certs/extfile.cnf"
-    #    state: touch
-    #
-    #
-    ##pendiente cambiar por lineinfile
-    #- name: Master cert extfile
-    #  command: "echo subjectAltName = DNS:$master,IP:{{ provision_rpis_cluster[0].ip }},IP:127.0.0.1 >> /opt/certs/extfile.cnf"
-    #
-    #- name: Master cert extfile
-    #  command: "echo extendedKeyUsage = serverAuth >> /opt/certs/extfile.cnf"
-    #
-    #- name: Master autosigned cert generation
-    #  command: "openssl x509 -req -days 365 -sha256 -in /opt/certs/server.csr -CA /opt/certs/ca.pem -CAkey /opt/certs/ca-key.pem \
-    #            -CAcreateserial -out /opt/certs/registry.crt -extfile /opt/certs/extfile.cnf \
-    #            -passin pass:{{ provision_master_cert_passwd }}"
-    #
-    #
-    #
-    #- name: Client cert extfile
-    #  command: "openssl genrsa -out /opt/certs/key.pem 4096"
-    #
-    #- name: Client cert extfile
-    #  command: "openssl req -subj '/CN=worker1' -new -key /opt/certs/key.pem -out /opt/certs/client.csr"
-    #
-    #- name: Create cert extfile for client
-    #  file:
-    #    path: "/opt/certs/extfile-client.cnf"
-    #    state: touch
-    #
-    #- name: Client cert extfile
-    #  command: "echo extendedKeyUsage = clientAuth > extfile-client.cnf"
-    #
-    #- name: Client autosigned cert generation
-    #  command: "openssl x509 -req -days 365 -sha256 -in /opt/certs/client.csr -CA /opt/certs/ca.pem -CAkey /opt/certs/ca-key.pem \
-    #            -CAcreateserial -out /opt/certs/cert.pem -extfile /opt/certs/extfile-client.cnf \
-    #            -passin pass:{{ provision_master_cert_passwd }}"
-    #
+# vim: ff=unix:ai:et:sw=2:ts=2:

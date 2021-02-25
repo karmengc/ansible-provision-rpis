@@ -1,31 +1,33 @@
 ---
 
-- name: Copy cert to anchors folder
-  copy:
-    src: /opt/certs/{{ item.source }}
-    dest: /usr/share/ca-certificates/{{ item.dest }}
-    remote_src: yes
+- name            : Copiar certificados  en la carpeta cacertificates
+  copy            :
+    src           : /opt/certs/{{ item.source }}
+    dest          : /usr/share/ca-certificates/{{ item.dest }}
+    remote_src    : yes
     directory_mode: yes
-    force: no
-  with_items:
-    - source: "registry.key"
-      dest: "master:5000.key"
-    - source: "registry.crt"
-      dest: "master:5000.crt"
-    - source: "ca.pem"
-      dest: "master:5000.pem"
+    force         : no
+  with_items      :
+    - source      : "registry.key"
+      dest        : "master:5000.key"
+    - source      : "registry.crt"
+      dest        : "master:5000.crt"
+    - source      : "ca.pem"
+      dest        : "master:5000.pem"
 
-- name: Copy cert to docker certs folder at nodes
-  copy:
-    src: "/opt/certs/{{ item }}"
-    dest: "/etc/docker/certs.d/master:5000/"
-    remote_src: yes
-    force: no
-  with_items:
+- name            : Copiar certificados en la carpeta de certificados de Docker en los nodos
+  copy            :
+    src           : "/opt/certs/{{ item }}"
+    dest          : "/etc/docker/certs.d/master:5000/"
+    remote_src    : yes
+    force         : no
+  with_items      :
     - registry.key
     - registry.crt
     - registry.cert
     - ca.pem
 
-- name: Execute update ca trust
-  command: "update-ca-certificates"
+- name            : Execute update ca trust
+  command         : "update-ca-certificates"
+
+# vim: ff=unix:ai:et:sw=2:ts=2:

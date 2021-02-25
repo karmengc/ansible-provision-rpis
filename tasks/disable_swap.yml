@@ -1,18 +1,19 @@
 ---
 
-- name: Administrar entrada de swap en el fichero fstab.
-  mount:
-    name: none
-    src: "{{ provision_swap_file_path }}"
-    fstype: swap
-    opts: sw
-    state: absent
+- name            : Administrar entrada de swap en el fichero fstab.
+  mount           :
+    name          : none
+    src           : "{{ provision_swap_file_path }}"
+    fstype        : swap
+    opts          : sw
+    state         : absent
 
-- name: Desactivar swap (si está configurada).
-  command: swapoff -a
+- name            : Desactivar swap (si está configurada).
+  command         : swapoff -a
 
-- name: Asegurar que el fichero de swap no existe (si está configurado).
-  file:
-    path: "{{ provision_swap_file_path }}"
-    state: absent
+- name            : Asegurar que el fichero de swap no existe (si está configurado).
+  file            :
+    path          : "{{ provision_swap_file_path }}"
+    state         : absent
 
+# vim: ff=unix:ai:et:sw=2:ts=2:

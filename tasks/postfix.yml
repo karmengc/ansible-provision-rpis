@@ -1,17 +1,17 @@
 ---
 
-- name: install package
-  apt:
-    pkg:
+- name            : install package
+  apt             :
+    pkg           :
       - "postfix"
       - "mailutils"
       - "libsasl2-2"
       - "ca-certificates"
       - "libsasl2-modules"
-    state: "latest"
+    state         : "latest"
 
-- name         : "Mail facts (2)"
-  set_fact     :
+- name            : "Mail facts (2)"
+  set_fact        :
 
     provision_mail_from_user     :
       "{{ provision_mail_from.split('@')[0] }}"
@@ -20,28 +20,28 @@
       "{{ provision_mail_from }}"
 
 
-- name         : "Mail folder"
-  file         :
-    path       : "/var/mail/allmail-recycler"
-    state      : "directory"
-    owner      : "nobody"
-    group      : "mail"
-    mode       : "0770"
+- name            : "Mail folder"
+  file            :
+    path          : "/var/mail/allmail-recycler"
+    state         : "directory"
+    owner         : "nobody"
+    group         : "mail"
+    mode          : "0770"
 
-- name         : "Cron mail purge"
-  copy         :
-    src        : "ansible-purge-mailarchive"
-    dest       : "/etc/cron.weekly/ansible-purge-mailarchive"
-    owner      : "root"
-    mode       : "0700"
+- name            : "Cron mail purge"
+  copy            :
+    src           : "ansible-purge-mailarchive"
+    dest          : "/etc/cron.weekly/ansible-purge-mailarchive"
+    owner         : "root"
+    mode          : "0700"
 
 
-- name         : "Postfix cert folder"
-  file         :
-    state      : "directory"
-    owner      : "root"
-    mode       : "0770"
-    path       : "/etc/postfix/ssl"
+- name            : "Postfix cert folder"
+  file            :
+    state         : "directory"
+    owner         : "root"
+    mode          : "0770"
+    path          : "/etc/postfix/ssl"
 
       #- name         : "Postfix CA certificate"
       #  copy         :
@@ -52,140 +52,140 @@
       #  notify       : "Reload postfix service"
 
 
-- name         : "Postfix 'main.cf'"
-  template     :
-    src        : "main.cf.j2"
-    dest       : "/etc/postfix/main.cf"
-    backup     : true
-    owner      : "root"
-    group      : "root"
-    mode       : "0644"
-  register     : "provision_postfix_maincf"
-  notify       : "Reload postfix service"
+- name            : "Postfix 'main.cf'"
+  template        :
+    src           : "main.cf.j2"
+    dest          : "/etc/postfix/main.cf"
+    backup        : true
+    owner         : "root"
+    group         : "root"
+    mode          : "0644"
+  register        : "provision_postfix_maincf"
+  notify          : "Reload postfix service"
 
 
-- name         : "Postfix 'master.cf'"
-  template     :
-    src        : "master.cf.j2"
-    dest       : "/etc/postfix/master.cf"
-    backup     : true
-    owner      : "root"
-    group      : "root"
-    mode       : "0644"
-  register     : "provision_postfix_mastercf"
-  notify       : "Reload postfix service"
+- name            : "Postfix 'master.cf'"
+  template        :
+    src           : "master.cf.j2"
+    dest          : "/etc/postfix/master.cf"
+    backup        : true
+    owner         : "root"
+    group         : "root"
+    mode          : "0644"
+  register        : "provision_postfix_mastercf"
+  notify          : "Reload postfix service"
 
 
 # rewrite just before delivering (envelope and headers)
-- name         : "Postfix 'generic'"
-  lineinfile   :
-    dest       : "/etc/postfix/generic"
-    state      : present
-    create     : yes
-    backup     : true
-    regexp     : "^{{ lhs.replace('.', '\\.') }}\\s"
-    line       : "{{ lhs.ljust(59) }} {{ rhs }}"
-  vars         :
-    lhs        : "{{ item }}@{{ ansible_hostname }}"
-    rhs        : "{{ provision_mail_from }}"
-  loop         :
+- name            : "Postfix 'generic'"
+  lineinfile      :
+    dest          : "/etc/postfix/generic"
+    state         : present
+    create        : yes
+    backup        : true
+    regexp        : "^{{ lhs.replace('.', '\\.') }}\\s"
+    line          : "{{ lhs.ljust(59) }} {{ rhs }}"
+  vars            :
+    lhs           : "{{ item }}@{{ ansible_hostname }}"
+    rhs           : "{{ provision_mail_from }}"
+  loop            :
     - "root"
     - "MAILER-DAEMON"
     - "double-bounce"
     - "DoNotReply"
-  register     : "provision_postfix_generic"
+  register        : "provision_postfix_generic"
 
-- name         : "Postmap 'generic'"
-  command      : "postmap /etc/postfix/generic"
-  when         : "provision_postfix_generic is changed"
+- name            : "Postmap 'generic'"
+  command         : "postmap /etc/postfix/generic"
+  when            : "provision_postfix_generic is changed"
 
 
-- name         : "Postfix 'transport'"
-  lineinfile   :
-    dest       : "/etc/postfix/transport"
-    state      : present
-    create     : yes
-    backup     : true
-    regexp     : '^mailarchive@{{ ansible_hostname }}\s'
-    line       : "mailarchive@{{ ansible_hostname }}     local"
-  register     : "provision_postfix_transport"
+- name            : "Postfix 'transport'"
+  lineinfile      :
+    dest          : "/etc/postfix/transport"
+    state         : present
+    create        : yes
+    backup        : true
+    regexp        : '^mailarchive@{{ ansible_hostname }}\s'
+    line          : "mailarchive@{{ ansible_hostname }}     local"
+  register        : "provision_postfix_transport"
 
-- name         : "Postmap 'transport'"
-  command      : "postmap /etc/postfix/transport"
-  when         : "provision_postfix_transport is changed"
-  notify       : "Reload postfix service"
+- name            : "Postmap 'transport'"
+  command         : "postmap /etc/postfix/transport"
+  when            : "provision_postfix_transport is changed"
+  notify          : "Reload postfix service"
 
 
 # rewrite before queueing (only envelope recipients)
-- name         : "Postfix 'virtual'"
-  lineinfile   :
-    dest       : "/etc/postfix/virtual"
-    backup     : true
-    state      : present
-    create     : yes
-    regexp     : "^{{ lhs.replace('.', '\\.') }}\\s"
-    line       : "{{ lhs.ljust(59) }} {{ rhs }}"
-  vars         :
-    lhs        : "{{ item.lhs }}"
-    rhs        : "{{ item.rhs }}"
-  loop         :
-    - lhs      : "postmaster"
-      rhs      : "root"
-    - lhs      : "root"
-      rhs      : "{{ provision_mail_from }}"
-    - lhs      : "root@localhost.{{ ansible_domain }}"
-      rhs      : "{{ provision_mail_from }}"
-  loop_control :
-    label      : "{{ item.lhs }}"
-  register     : "provision_postfix_virtual"
+- name            : "Postfix 'virtual'"
+  lineinfile      :
+    dest          : "/etc/postfix/virtual"
+    backup        : true
+    state         : present
+    create        : yes
+    regexp        : "^{{ lhs.replace('.', '\\.') }}\\s"
+    line          : "{{ lhs.ljust(59) }} {{ rhs }}"
+  vars            :
+    lhs           : "{{ item.lhs }}"
+    rhs           : "{{ item.rhs }}"
+  loop            :
+    - lhs         : "postmaster"
+      rhs         : "root"
+    - lhs         : "root"
+      rhs         : "{{ provision_mail_from }}"
+    - lhs         : "root@localhost.{{ ansible_domain }}"
+      rhs         : "{{ provision_mail_from }}"
+  loop_control    :
+    label         : "{{ item.lhs }}"
+  register        : "provision_postfix_virtual"
 
-- name         : "Postmap 'virtual'"
-  command      : "postmap /etc/postfix/virtual"
-  when         : "provision_postfix_virtual is changed"
-  notify       : "Reload postfix service"
-
-
-- name         : "Postfix 'sasl'"
-  template     :
-    src        : "sasl_passwd.j2"
-    dest       : "/etc/postfix/sasl_passwd"
-    owner      : "root"
-    mode       : "0600"
-  register     : "provision_postfix_sasl"
-
-- name         : "Postmap 'sasl'"
-  command      : "postmap /etc/postfix/sasl_passwd"
-  when         : "provision_postfix_sasl is changed"
-  notify       : "Reload postfix service"
+- name            : "Postmap 'virtual'"
+  command         : "postmap /etc/postfix/virtual"
+  when            : "provision_postfix_virtual is changed"
+  notify          : "Reload postfix service"
 
 
-- name         : "Mailarchive user"
-  user         :
-    name       : "mailarchive"
-    shell      : "/sbin/nologin"
-    createhome : false
+- name            : "Postfix 'sasl'"
+  template        :
+    src           : "sasl_passwd.j2"
+    dest          : "/etc/postfix/sasl_passwd"
+    owner         : "root"
+    mode          : "0600"
+  register        : "provision_postfix_sasl"
+
+- name            : "Postmap 'sasl'"
+  command         : "postmap /etc/postfix/sasl_passwd"
+  when            : "provision_postfix_sasl is changed"
+  notify          : "Reload postfix service"
+
+
+- name            : "Mailarchive user"
+  user            :
+    name          : "mailarchive"
+    shell         : "/sbin/nologin"
+    createhome    : false
 
 
 # just for local delivery (only recipients, not headers)
-- name         : "Aliases file"
-  lineinfile   :
-    dest       : "/etc/aliases"
-    backup     : true
-    regexp     : '^mailarchive:\s'
-    line       : "mailarchive:    /var/mail/allmail-recycler/"
-  register     : "provision_postfix_aliases"
+- name            : "Aliases file"
+  lineinfile      :
+    dest          : "/etc/aliases"
+    backup        : true
+    regexp        : '^mailarchive:\s'
+    line          : "mailarchive:    /var/mail/allmail-recycler/"
+  register        : "provision_postfix_aliases"
 
-- name         : "Aliases update"
-  command      : "newaliases"
-  when         : "provision_postfix_aliases is changed"
-  notify       : "Reload postfix service"
+- name            : "Aliases update"
+  command         : "newaliases"
+  when            : "provision_postfix_aliases is changed"
+  notify          : "Reload postfix service"
 
 
-- name         : "Enable postfix service"
-  service      :
-    name       : "postfix"
-    state      : "started"
-    enabled    : true
+- name            : "Enable postfix service"
+  service         :
+    name          : "postfix"
+    state         : "started"
+    enabled       : true
 
 
 

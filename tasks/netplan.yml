@@ -1,37 +1,38 @@
 ---
 
-- name: Install netplan
-  apt:
-    name: "{{ netplan_packages }}"
-    state: present
-  become: true
-  register: result
-  until: result is successful
+- name        : Instalar Netplan
+  apt         :
+    name      : "{{ netplan_packages }}"
+    state     : present
+  become      : true
+  register    : result
+  until       : result is successful
 
-- name: Capturing Existing Configurations
-  find:
-    paths: /etc/netplan
-    patterns: "*.yml,*.yaml"
-  register: _netplan_configs
+- name        : Listado de configuraciones existentes
+  find        :
+    paths     : /etc/netplan
+    patterns  : "*.yml,*.yaml"
+  register    : _netplan_configs
 
-- debug: var=_netplan_configs
+- debug       : var=_netplan_configs
 
-- name: Removing Existing Configurations
-  file:
-    path: "{{ item['path'] }}"
-    state: absent
-  become: true
-  with_items: "{{ _netplan_configs['files'] }}"
-  when:
+- name        : Eliminar configuraciones existentes si así se ha indicado
+  file        :
+    path      : "{{ item['path'] }}"
+    state     : absent
+  become      : true
+  with_items  : "{{ _netplan_configs['files'] }}"
+  when        :
     - item['path'] != netplan_config_file
     - netplan_configuration != []
     - netplan_remove_existing
 
-- name: Configuring Netplan
-  template:
-    src: netplan_config.yaml.j2
-    dest: "{{ netplan_config_file }}"
-  become: true
-  when: netplan_configuration != []
-  notify: netplan generate config
+- name        : Configurar Netplan
+  template    :
+    src       : netplan_config.yaml.j2
+    dest      : "{{ netplan_config_file }}"
+  become      : true
+  when        : netplan_configuration != []
+  notify      : netplan generate config
 
+# vim: ff=unix:ai:et:sw=2:ts=2:
