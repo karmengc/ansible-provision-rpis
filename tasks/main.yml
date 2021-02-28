@@ -95,7 +95,7 @@
 #Montar directorios anteriores
 - name          : Montar carpetas NFS
   include_tasks : nfs_mount.yml
-  when          : provision_mount_nfs or provision_master_nfs2nodes
+  when          : provision_host_nfs_mount or provision_master_nfs2nodes
 
 - name          : Instalar certificado de Master en todas las maquinas
   include_tasks : install_cert.yml
