@@ -38,7 +38,7 @@ Mediante la siguiente variable se indican los paquetes que se desean instalar en
 provision_rpis_packages: ['vim','curl','wget','iproute2','nfs-common']
 ```
 
-### Certificado autofirmado de máster
+## Certificado autofirmado de máster
 Para generar un certificado autofirmado del servidor máster indicar:
 ```
 provision_master_selfcert: true
@@ -48,7 +48,7 @@ Será necesario indicar los directorios donde se vuelca el certificado para ser 
 para así ser montadas en el resto de nodos e instalar dicho certificado en todos ellos.
 
 
-### Postfix
+## Postfix
 Para indicar que se desea instalar y configurar postfix en todas las máquinas:
 ```
 provision_postfix: true
@@ -66,11 +66,11 @@ provision_mail_smarthost_port: "587"
 provision_mail_localsmtp: false
 ```
 
-### NFS Master-Nodes
+## NFS Master-Nodes
 
 Se indica si se va a montar un directorio NFS o no. Para ello es necesario definir las siguientes variables:
 
-## Para montar un directorio NFS procedente del host desde el cual desplegamos:
+### Para montar un directorio NFS procedente del host desde el cual desplegamos:
 ```
 provision_nfs_host_mount: true
 #Ip desde el host que estamos desplegando Ansible. Utilizado para exportar por NFS:
@@ -80,7 +80,7 @@ provision_host_nfs_dir_exported: "/home/carmen/UPO/TFM/nfs"
 ```
 en este rol no se instalan paquetes en el host ni se configura /etc/exports, se supone que esta labor ya la ha realizado el administrador
 
-## Para exporta directorios NFS desde el máster y montarlos en los nodos:
+### Para exporta directorios NFS desde el máster y montarlos en los nodos:
 Directorio(s) a exportar desde el máster:
 ```
 provision_nfs_master_exports: [ "/opt/certs *(rw,sync,no_root_squash)", "/opt/registry *(rw,sync,no_root_squash)", "/opt/auth *(rw,sync,no_root_squash)" ]
@@ -94,7 +94,7 @@ provision_nfs_share_mounts:
 
 ```
 
-### Netplan
+## Netplan
 Se han incluido unas tareas para configuración de Netplan si así se desea, pero es necesario definir el fichero yaml completo con cuidado,
 puesto que ello puede ocasionar dejar la máquina sin red.
 
