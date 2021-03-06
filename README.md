@@ -1,4 +1,4 @@
-Role Name
+Ansible-provision-rpis
 =========
 
 Rol para provisionar máquinas con sistema operativo Debian a nivel de paquetería, configuración de correo y directorios NFS a exportar/importar si fuera necesario.

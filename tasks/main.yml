@@ -60,6 +60,12 @@
     regexp      : '^PermitRootLogin'
     line        : 'PermitRootLogin no'
 
+      #- name          : Añadir repositorio para instalar Helm
+      #  shell         : |
+      #                curl https://baltocdn.com/helm/signing.asc | sudo apt-key add - \ 
+      #                sudo apt-get install apt-transport-https --yes \
+      #                echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+
 - name          : Actualizar apt
   apt           : 
     update_cache: yes
@@ -70,6 +76,10 @@
 
 - name          : Instalar paquetes indicados
   apt           : name={{ provision_rpis_packages }} state=latest force_apt_get=yes
+
+
+- name          : Instalar Helm mediante snap
+  command       : "sudo snap install helm --classic"
 
 - name          : Añadir líneas en etc_hosts para que se vean entre sí
   blockinfile   :
@@ -95,7 +105,7 @@
 #Montar directorios anteriores
 - name          : Montar carpetas NFS
   include_tasks : nfs_mount.yml
-  when          : provision_host_nfs_mount or provision_master_nfs2nodes
+  when          : provision_nfs_host_mount or provision_master_nfs2nodes
 
 - name          : Instalar certificado de Master en todas las maquinas
   include_tasks : install_cert.yml

@@ -17,7 +17,7 @@
     passno      : "{{ item.passno | default(omit) }}"
     state       : "{{ item.state | default( 'mounted' ) }}"
   with_items    : "{{ provision_nfs_host_share_mounts }}"
-  when          : provision_host_nfs_mount
+  when          : provision_nfs_host_mount
 
 #Montar las carpetas exportadas desde el master con el certificado    
 - name          : Montar carpetas NFS exportadas desde el master en los nodos
