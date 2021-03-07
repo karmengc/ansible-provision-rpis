@@ -115,4 +115,18 @@
   include_tasks : disable_swap.yml
   when          : provision_disable_swap
 
+# Crear carpetas para Persisten Volumen en caso de desplegar Prometheus
+- name: Create and set 777 perms for Prometheus PV Folder
+  file:
+    path: "/{{ item }}"
+    state: directory
+    mode: "0777"
+    recurse: yes
+  with_items:
+    - "data/localstorage/prometheus-server"
+    - "data/localstorage/prometheus-alertmanager"
+  when: ansible_hostname == "worker1" and '"monitoring" in apps_to_deploy'
+
+
+
 # vim: ff=unix:ai:et:sw=2:ts=2:
