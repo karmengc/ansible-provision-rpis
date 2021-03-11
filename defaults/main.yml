@@ -25,3 +25,6 @@ netplan_packages:
   - netplan.io
 
 netplan_apply: True
+
+provision_timezone: "Europe/Amsterdam"
+provision_ntp_server: "0.debian.pool.ntp.org"

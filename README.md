@@ -19,11 +19,14 @@ Para establecer un usuario que si no existe será creado en todas las máquinas 
 provision_cluster_user: "vagrant" 
 provision_cluster_user_passwd: "vagrant" 
 ```
-Se recomienda definir la contraseña en un fichero vault (ansible-vault create fichero.yml). Posteriormente guardar la contraseña de encripatción en otro fichero 
+Se recomienda definir la contraseña en un fichero vault (ansible-vault create fichero.yml). Posteriormente guardar la contraseña de encriptación en otro fichero 
 y asignar la ruta del mismo a la variable de entorno siguiente antes de desplegar:
 ```
 export ANSIBLE_VAULT_PASSWORD_FILE=/ruta/al/fichero/.vault_pass.txt
 ```
+
+**Importante** En este rol, se incorpora el usuario elegido al grupo wheel y además se le concede realizar operaciones sudo sin password.
+
 
 El siguiente diccionario se establece con nombre de máquina e IP, para rellenar el fichero /etc/hosts de cada nodo y así identificarse entre sí. Ejemplo:
 ```
@@ -47,6 +50,16 @@ provision_master_selfcert: true
 Será necesario indicar los directorios donde se vuelca el certificado para ser exportados por NFS en las variables destinadas para ello,
 para así ser montadas en el resto de nodos e instalar dicho certificado en todos ellos.
 
+
+## NTP
+Se instala el servicio NTP ya que es necesario que la hora esté correctamente sincronizada si se desean recoger métricas con Prometheus en el clúster.
+
+Las variables a asignar son:
+
+```
+provision_timezone: Europe/Amsterdam (valor por defecto)
+provision_ntp_server:  "0.debian.pool.ntp.org" (valor por defecto)
+```
 
 ## Postfix
 Para indicar que se desea instalar y configurar postfix en todas las máquinas:

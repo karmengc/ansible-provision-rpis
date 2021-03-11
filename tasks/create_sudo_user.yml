@@ -1,12 +1,12 @@
 ---
 
-- name              : Crear usuario
+- name              : Crear/Actualizar usuario
   user              :
     name            : "{{ provision_cluster_user }}"
     shell           : "/bin/bash"
     groups          : "wheel"
     append          : yes
-    password        : "{{ provision_cluster_user_passwd }}"
+    password        : "{{ provision_cluster_user_passwd | password_hash('sha512') }}"
     generate_ssh_key: yes
     ssh_key_bits    : 2048
     ssh_key_file    : .ssh/id_rsa

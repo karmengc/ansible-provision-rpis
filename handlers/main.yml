@@ -18,4 +18,13 @@
   become    : true
   when      : netplan_apply
 
+    # handlers para NTP    
+- name      : reconfigure tzdata
+  command   : dpkg-reconfigure -f noninteractive tzdata
+
+- name      : restart ntp
+  service   :
+    name    : ntp
+    state   : restarted
+
 # vim: ff=unix:ai:et:sw=2:ts=2:

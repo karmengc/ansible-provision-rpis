@@ -1,0 +1,37 @@
+---
+
+# Fuente: https://github.com/justb4/ansible-ubuntu-ntp/blob/master/tasks/main.yml
+#
+#
+
+- name              : Configurar zona horaria
+  template          :
+    src             : timezone
+    dest            : /etc/timezone
+    owner           : root
+    group           : root
+  notify            : reconfigure tzdata
+
+- name              : Instalar tzdata
+  apt               : pkg=tzdata state=present
+
+- name              : Instalar ntp
+  apt               : pkg=ntp state=present
+
+- name              : Iniciar servicio ntp
+  service           : name=ntp state=started enabled=true
+
+- name              : Establecer servidor ntp en la configuración
+  lineinfile        :
+    dest            : "/etc/ntp.conf"
+    state           : present
+    regexp          : '^server '
+    line            : 'server {{ provision_ntp_server }} iburst'
+  notify: restart ntp
+
+- name              : Eliminar el resto de servidores ntp de la configuración
+  lineinfile        :
+    dest            : "/etc/ntp.conf"
+    state           : absent
+    regexp          : "^server\\s+(?!{{ provision_ntp_server }})"
+  notify            : restart ntp
