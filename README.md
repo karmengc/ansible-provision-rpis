@@ -41,6 +41,11 @@ Mediante la siguiente variable se indican los paquetes que se desean instalar en
 provision_rpis_packages: ['vim','curl','wget','iproute2','nfs-common']
 ```
 
+Se ha creado el tag ''provision\_install\_tasks'' para que una vez creado el cluster poder hacer --skip-tags del mismo y así evitar una actualización del sistema o de paquetes no controlada.
+
+Aquellas tareas en las que se utiliza el módulo apt pero state tiene un valor de present, no actualizarán el sistema, simplemente comprobarán que el paquete requerido se encuentra instalado.
+
+
 ## Certificado autofirmado de máster
 Para generar un certificado autofirmado del servidor máster indicar:
 ```

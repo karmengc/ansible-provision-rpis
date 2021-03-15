@@ -69,12 +69,14 @@
   apt           : 
     update_cache: yes
     force_apt_get: yes
+  tags          : provision_install_tasks
 
 - name          : Esperar si APT se encuentra bloqueado
   shell         : while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
 
 - name          : Instalar paquetes indicados
   apt           : name={{ provision_rpis_packages }} state=latest force_apt_get=yes
+  tags          : provision_install_tasks
 
 
 - name          : Instalar servidor de hora NTP
@@ -82,6 +84,7 @@
 
 - name          : Instalar Helm mediante snap
   command       : "sudo snap install helm --classic"
+  tags          : provision_install_tasks
 
 - name          : Añadir líneas en etc_hosts para que se vean entre sí
   blockinfile   :
