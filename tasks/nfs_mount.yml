@@ -1,13 +1,11 @@
 ---
 
 - name          : Instalar paquete cliente NFS
-  become        : true
   apt           :
     pkg         : nfs-common
     state       : present
 
 - name          : Montar directorios NFS de la máquina Host en todos los miembros del cluster
-  become        : true
   mount         :
     fstype      : nfs
     name        : "{{ item.path }}"
@@ -21,7 +19,6 @@
 
 #Montar las carpetas exportadas desde el master con el certificado    
 - name          : Montar carpetas NFS exportadas desde el master en los nodos
-  become        : true
   mount         :
     fstype      : nfs
     name        : "{{ item.path }}"

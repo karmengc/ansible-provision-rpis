@@ -20,38 +20,6 @@
       "{{ provision_mail_from }}"
 
 
-- name            : "Mail folder"
-  file            :
-    path          : "/var/mail/allmail-recycler"
-    state         : "directory"
-    owner         : "nobody"
-    group         : "mail"
-    mode          : "0770"
-
-- name            : "Cron mail purge"
-  copy            :
-    src           : "ansible-purge-mailarchive"
-    dest          : "/etc/cron.weekly/ansible-purge-mailarchive"
-    owner         : "root"
-    mode          : "0700"
-
-
-- name            : "Postfix cert folder"
-  file            :
-    state         : "directory"
-    owner         : "root"
-    mode          : "0770"
-    path          : "/etc/postfix/ssl"
-
-      #- name         : "Postfix CA certificate"
-      #  copy         :
-      #    src        : "{{ provision_mail_cacertificate }}"
-      #    dest       : "/etc/postfix/ssl"
-      #    owner      : "root"
-      #    mode       : "0440"
-      #  notify       : "Reload postfix service"
-
-
 - name            : "Postfix 'main.cf'"
   template        :
     src           : "main.cf.j2"
